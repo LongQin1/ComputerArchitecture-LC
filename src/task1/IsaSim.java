@@ -28,7 +28,7 @@ public class IsaSim {
 		pc = 0;
 
 		for (;;) {
-
+			// instructions is 32bits totally 
 			int instr = progr[pc];
 			int opcode = instr & 0x7f;
 			int rd = (instr >> 7) & 0x01f;
