@@ -8,10 +8,9 @@ public class Translator {
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 	public static void main(String[] args) throws IOException {
 		// read the binary file into byte
-		// however paths.get doesn't work on my labtop,couldn't find the right path..
-		Path path = Paths.get("Users/qinlong/eclipse-workspace/RISC-V/src/test1/addlarge.bin");
+		Path path = Paths.get("./src/test1/addlarge.bin");
 		byte[] data = Files.readAllBytes(path);
-		System.out.println(data);
+		System.out.println(bytesToHex(data));
 	}
 	// method used for translate the binary to hex
 	//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
