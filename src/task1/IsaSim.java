@@ -22,6 +22,7 @@ public class IsaSim {
 	};
 
 	public static void main(String[] args) {
+		
 
 		System.out.println("Hello RISC-V World!");
 
@@ -76,7 +77,7 @@ public class IsaSim {
 							reg[rd]=1;}
 						else {reg[rd]=0;}
 					}
-					else {
+					else{
 						//Note, SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0 (assembler pseudo-op SEQZ rd, rs).   ?????
 						if(reg[rs1]==imm110) {
 							reg[rd]=1;}
@@ -156,20 +157,20 @@ public class IsaSim {
 				break;
 				
 			case 0x33:
-				switch(funct3) {
-					switch(imm115){
-						// add
-						case 0x0:
-							reg[rd]=reg[rs1]+reg[rs2];
-							break;
+				switch(funct3){
+					case 0x00:
+						switch(imm115){
+							// add
+							case 0x0:
+								reg[rd]=reg[rs1]+reg[rs2];
+								break;
 						//sub
-						case 0x20:
-							reg[rd]=reg[rs1]-reg[rs2];
-							break;
-					}
+							case 0x20:
+								reg[rd]=reg[rs1]-reg[rs2];
+								break;
+						}
 					case 0x01:
-						reg[rd]=å
-					
+						reg[rd]=reg[rs1] >>rs2;
 				}
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
@@ -189,5 +190,6 @@ public class IsaSim {
 		System.out.println("Program exit");
 
 	}
+
 
 }
