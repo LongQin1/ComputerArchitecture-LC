@@ -1,17 +1,11 @@
 package task1;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 public class Translator {
+
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-	public static void main(String[] args) throws IOException {
-		// read the binary file into byte
-		Path path = Paths.get("./src/test1/addlarge.bin");
-		byte[] data = Files.readAllBytes(path);
-		System.out.println(bytesToHex(data));
-	}
+
+
 	// method used for translate the binary to hex
 	//https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
 	public static String bytesToHex(byte[] bytes) {
@@ -22,6 +16,39 @@ public class Translator {
 	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
 	    }
 	    return new String(hexChars);
+	}
+
+	public Translator() {
+
+	}
+
+	public static int[] getArray(String ins) {
+
+		int insCount = ins.length()/8;
+		int[] res = new int[insCount];
+		int decimal;
+
+
+		String[] instructionsString;
+
+		if (ins.length() == 0){
+			System.out.println("Error");
+		}
+		else {
+			instructionsString = ins.split("(?<=\\G........)");
+			for (int i = 0; i < insCount; i++){
+
+				decimal = (int) Long.parseLong(instructionsString[i],16);
+
+				//int result = (Integer.parseInt(Integer.toString(Integer.parseInt(instructionsString[i], 16), 2).replace('0', 'X').replace('1', '0').replace('X', '1'), 2) + 1) * -1;
+
+				res[i] = decimal;
+				System.out.println(res[i]);
+			}
+		}
+		return res;
+
+
 	}
 }
 

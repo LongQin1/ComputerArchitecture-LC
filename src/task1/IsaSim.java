@@ -1,4 +1,12 @@
 package task1;
+
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
 /**
  * RISC-V Instruction Set Simulator
  * 
@@ -12,20 +20,17 @@ public class IsaSim {
 
 	static int pc;
 	static int reg[] = new int[4];
-
+	public static task1.Translator translator = new task1.Translator();
 	// Here the first program hard coded as an array
-	static int progr[] = {
-			// As minimal RISC-V assembler example
-			0x00200093, // addi x1 x0 2
-			0x00300113, // addi x2 x0 3
-			0x002081b3, // add x3 x1 x2
-	};
-
-	public static void main(String[] args) {
-
+	static String blabla = "0020009300300113002081b3";
+	static int progr[];
+	public static void main(String[] args) throws IOException {
+		Path path = Paths.get("./src/test1/addlarge.bin");
+		byte[] data = Files.readAllBytes(path);
 		System.out.println("Hello RISC-V World!");
-
 		pc = 0;
+		String hex = translator.bytesToHex(data);
+		progr = translator.getArray(blabla);
 
 		for (;;) {
 			// instructions is 32bits totally 
@@ -153,22 +158,24 @@ public class IsaSim {
 					break;
 					 
 				}
-				break;
+
 				
 			case 0x33:
 				switch(funct3) {
-					switch(imm115){
-						// add
-						case 0x0:
-							reg[rd]=reg[rs1]+reg[rs2];
-							break;
-						//sub
-						case 0x20:
-							reg[rd]=reg[rs1]-reg[rs2];
-							break;
-					}
 					case 0x01:
-						reg[rd]=å
+
+
+						switch(imm115){
+							// add
+							case 0x0:
+								reg[rd]=reg[rs1]+reg[rs2];
+								break;
+							//sub
+							case 0x20:
+								reg[rd]=reg[rs1]-reg[rs2];
+								break;
+						}
+
 					
 				}
 			default:
@@ -183,7 +190,7 @@ public class IsaSim {
 			for (int i = 0; i < reg.length; ++i) {
 				System.out.print(reg[i] + " ");
 			}
-			System.out.println();	
+			System.out.println();
 		}
 
 		System.out.println("Program exit");
