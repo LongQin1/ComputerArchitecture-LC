@@ -87,7 +87,7 @@ public class IsaSim {
 					break;
 				//XORI
 				case 0x4:
-					if((imm110 >> 11 )==1){
+					if((imm110 >> 11) ==1){
 						if((reg[rs1] >> 4) ==1) {
 							reg[rd] = (0xFFFFF000 + imm110 )^(0x7FFFFFE0 + reg[rs1]);
 						}else {
@@ -102,7 +102,7 @@ public class IsaSim {
 					}
 					break;
 				
-				//XORI
+				//ORI
 				case 0x6:
 					if((imm110 >> 11 )==1){
 						if((reg[rs1] >> 4) ==1) {
@@ -133,14 +133,44 @@ public class IsaSim {
 						}	
 					}
 					break;
-				
+				// SLLI
 				case 0x01:
 					reg[rd]= reg[rs1] << rs2;
 					break;
+				//SRLI and SRAI
 				case 0x05:
+					switch(imm115){
+					case 0x00:
+						reg[rd]= reg[rs1] >> rs2;
+					case 0x20:
+						if ((imm40 >>4)==1) {
+							reg[rd]= (reg[rs1] >> rs2)+(80000000);
+						}else {
+							reg[rd]= reg[rs1] >>rs2;
+						}
+						break;
+					}
+					break;
 					 
 				}
 				break;
+				
+			case 0x33:
+				switch(funct3) {
+					switch(imm115){
+						// add
+						case 0x0:
+							reg[rd]=reg[rs1]+reg[rs2];
+							break;
+						//sub
+						case 0x20:
+							reg[rd]=reg[rs1]-reg[rs2];
+							break;
+					}
+					case 0x01:
+						reg[rd]=å
+					
+				}
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
@@ -153,7 +183,7 @@ public class IsaSim {
 			for (int i = 0; i < reg.length; ++i) {
 				System.out.print(reg[i] + " ");
 			}
-			System.out.println();
+			System.out.println();	
 		}
 
 		System.out.println("Program exit");
