@@ -169,9 +169,43 @@ public class IsaSim {
 								reg[rd]=reg[rs1]-reg[rs2];
 								break;
 						}
-					case 0x01:
-						reg[rd]=reg[rs1] >>rs2;
+					case 0x01://SLL 
+						reg[rd]=reg[rs1] << (reg[rs2] & 0x1F);
+						break;
+					case 0x05://SRL and SRA
+						switch(imm115) {
+						case 0x0:
+							reg[rd]= reg[rs1] >>(reg[rs2] & 0x1F);
+							break;
+						case 0x20:
+							if((reg[rs1] >> 31) ==1){
+								if((reg[rs2] >>4) ==1) {
+									reg[rd] =reg[rs1]>>(reg[rs2]& 0x1F);
+								}else {
+									reg[rd] = reg[]
+								}
+							}else {
+								
+							}
+						}
+						break;
+					case 0x02://SLT
+						if(reg[rs1]<reg[rs2]) {
+							reg[rd]=1;
+						}else {
+							reg[rd]=0;
+						}
+						break;
+					case 0x03://SLTu
+						//if()
+						break;
+					case 0x04://XOR case
+						reg[rd]=reg[rs1]^reg[rs2];
+						
+						break;
+
 				}
+				
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
