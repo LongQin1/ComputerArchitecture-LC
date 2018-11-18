@@ -1,6 +1,8 @@
 package task1;
 
 
+import java.util.Arrays;
+
 public class Translator {
 
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -15,7 +17,8 @@ public class Translator {
 	        hexChars[j * 2] = hexArray[v >>> 4];
 	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
 	    }
-	    return new String(hexChars);
+		hexChars = Arrays.copyOfRange(hexChars, 0,hexChars.length);
+		return new String(hexChars);
 	}
 
 	public Translator() {
@@ -24,7 +27,7 @@ public class Translator {
 
 	public static int[] getArray(String ins) {
 
-		int insCount = ins.length()/8;
+		int insCount = ins.length()/7;
 		int[] res = new int[insCount];
 		int decimal;
 
@@ -37,13 +40,13 @@ public class Translator {
 		else {
 			instructionsString = ins.split("(?<=\\G........)");
 			for (int i = 0; i < insCount; i++){
+				System.out.println(instructionsString[i]);
 
 				decimal = (int) Long.parseLong(instructionsString[i],16);
 
 				//int result = (Integer.parseInt(Integer.toString(Integer.parseInt(instructionsString[i], 16), 2).replace('0', 'X').replace('1', '0').replace('X', '1'), 2) + 1) * -1;
 
 				res[i] = decimal;
-				System.out.println(res[i]);
 			}
 		}
 		return res;

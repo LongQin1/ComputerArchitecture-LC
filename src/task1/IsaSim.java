@@ -30,7 +30,7 @@ public class IsaSim {
 		System.out.println("Hello RISC-V World!");
 		pc = 0;
 		String hex = translator.bytesToHex(data);
-		progr = translator.getArray(blabla);
+		progr = translator.getArray(hex);
 
 		for (;;) {
 			// instructions is 32bits totally 
