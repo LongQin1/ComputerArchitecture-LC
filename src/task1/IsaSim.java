@@ -20,7 +20,6 @@ public class IsaSim {
 
 	static int pc;
 	static int reg[] = new int[4];
-	public static task1.Translator translator = new task1.Translator();
 	// Here the first program hard coded as an array
 	static String blabla = "0020009300300113002081b3";
 	static int progr[];
@@ -29,9 +28,8 @@ public class IsaSim {
 		byte[] data = Files.readAllBytes(path);
 		System.out.println("Hello RISC-V World!");
 		pc = 0;
-		String hex = translator.bytesToHex(data);
-		progr = translator.getArray(hex);
-
+		Translator translator = new Translator(data);
+		progr = translator.getFinalInstructions();
 		for (;;) {
 			// instructions is 32bits totally 
 			int instr = progr[pc];
