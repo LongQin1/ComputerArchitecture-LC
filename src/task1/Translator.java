@@ -11,9 +11,10 @@ public class Translator {
 	int[] finalInstructions;
 
 
+	// Constructor
 	public Translator(byte[] bytes) {
 		hexChars = bytesToHex(reverse(bytes));
-		reverseArray(getArray(hexChars));
+		getArray(hexChars);
 	}
 
 	// method used for translate the binary to hex
@@ -57,7 +58,7 @@ public class Translator {
 
 
 
-	public static int[] getArray(String ins) {
+	public void getArray(String ins) {
 
 		int insCount = ins.length()/8;
 		int[] res = new int[insCount];
@@ -79,7 +80,7 @@ public class Translator {
 				res[i] = decimal;
 			}
 		}
-		return res;
+		finalInstructions = res;
 
 
 	}

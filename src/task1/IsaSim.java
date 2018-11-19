@@ -19,9 +19,7 @@ import java.nio.file.Paths;
 public class IsaSim {
 
 	static int pc;
-	static int reg[] = new int[4];
-	// Here the first program hard coded as an array
-	static String blabla = "0020009300300113002081b3";
+	static int reg[] = new int[32];
 	static int progr[];
 	public static void main(String[] args) throws IOException {
 		Path path = Paths.get("./src/test1/addlarge.bin");
@@ -30,6 +28,7 @@ public class IsaSim {
 		pc = 0;
 		Translator translator = new Translator(data);
 		progr = translator.getFinalInstructions();
+
 		for (;;) {
 			// instructions is 32bits totally 
 			int instr = progr[pc];
