@@ -12,7 +12,11 @@ public class IsaSim {
 
 	static int pc;
 	static int reg[] = new int[4];
-
+	public static int compareUnsigned(long x, long y) {
+		 return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE);
+	}
+    static 	Jumpins jp = new Jumpins();
+    
 	// Here the first program hard coded as an array
 	static int progr[] = {
 			// As minimal RISC-V assembler example
@@ -170,18 +174,10 @@ public class IsaSim {
 						case 0x0:
 							reg[rd]= reg[rs1] >>(reg[rs2] & 0x1F);
 							break;
-						case 0x20:
-							if((reg[rs1] >> 31) ==1){
-								if((reg[rs1] >>(reg[rs1]>>0x1f)>>31)==1) {
-									reg[rd] =(reg[rs1]>>rs2) +(00000000);
-								}else {
-									reg[rd] = (reg[rs1]>>rs2);
-								}
-							}else {
-								
-							}
-						}
-						break;
+						case 0x20://SRA
+							reg[rd]=reg[rs1]>>(reg[rs2]& 0x1F);
+							break;
+						}break;
 					case 0x02://SLT
 						if(reg[rs1]<reg[rs2]) {
 							reg[rd]=1;
@@ -189,8 +185,12 @@ public class IsaSim {
 							reg[rd]=0;
 						}
 						break;
-					case 0x03://SLTu
-						//if()
+					case 0x03://SLTU
+						if(compareUnsigned(reg[rs1],reg[rs2])<0) {
+							reg[rd]=1;
+						}else {
+							reg[rd]=0;
+						}
 						break;
 					case 0x04://XOR case
 						reg[rd]=reg[rs1]^reg[rs2];
@@ -239,6 +239,8 @@ public class IsaSim {
 		System.out.println("Program exit");
 
 	}
+
+
 
 
 }
