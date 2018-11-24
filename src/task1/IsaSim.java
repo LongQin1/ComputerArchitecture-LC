@@ -9,13 +9,13 @@ package task1;
  *
  */
 public class IsaSim {
-
+	
 	static int pc;
 	static int reg[] = new int[4];
 	public static int compareUnsigned(long x, long y) {
 		 return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE);
 	}
-    static 	Jumpins jp = new Jumpins();
+    static 	ComputerCount PC = new ComputerCount();
     
 	// Here the first program hard coded as an array
 	static int progr[] = {
@@ -27,7 +27,7 @@ public class IsaSim {
 
 	public static void main(String[] args) {
 		
-
+		boolean jump = false;
 		System.out.println("Hello RISC-V World!");
 
 		pc = 0;
@@ -203,6 +203,7 @@ public class IsaSim {
 						break;
 	
 				}
+				break;
 			case 0x73: // ECALL https://github.com/kvakil/venus/wiki/Environmental-Calls 
 				if(reg[0x1010]==1) {
 					System.out.println(reg[0x1011]);
@@ -220,7 +221,18 @@ public class IsaSim {
 					System.out.println("please enter the right a0");
 				}
 				break;
-
+			// start doing jump instructions
+			// the first instruction will be JAL
+			case 0x6F:
+				reg[rd]=ComputerCount.PC + 4;
+				PC.jal(imm1210);
+				jump=true;
+				break;
+			case 0x67:
+				
+				
+				
+				
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
