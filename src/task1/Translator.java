@@ -80,7 +80,7 @@ public class Translator {
 				res[i] = decimal;
 			}
 		}
-		finalInstructions = res;
+		reverseArray(res);
 
 
 	}
