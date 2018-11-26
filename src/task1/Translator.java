@@ -72,7 +72,6 @@ public class Translator {
 		else {
 			instructionsString = ins.split("(?<=\\G........)");
 			for (int i = 0; i < insCount; i++){
-				System.out.println(instructionsString[i]);
 				decimal = (int) Long.parseLong(instructionsString[i],16);
 
 				//int result = (Integer.parseInt(Integer.toString(Integer.parseInt(instructionsString[i], 16), 2).replace('0', 'X').replace('1', '0').replace('X', '1'), 2) + 1) * -1;

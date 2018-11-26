@@ -22,7 +22,7 @@ public class IsaSim {
 	static int reg[] = new int[32];
 	static int progr[];
 	public static void main(String[] args) throws IOException {
-		Path path = Paths.get("./src/test1/addlarge.bin");
+		Path path = Paths.get("./src/InstructionTests/test_add.bin");
 		byte[] data = Files.readAllBytes(path);
 		System.out.println("Hello RISC-V World!");
 		pc = 0;
