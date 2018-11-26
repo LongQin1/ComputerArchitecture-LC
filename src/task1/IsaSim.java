@@ -1,4 +1,12 @@
 package task1;
+
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
 /**
  * RISC-V Instruction Set Simulator
  * 
@@ -9,28 +17,24 @@ package task1;
  *
  */
 public class IsaSim {
-	
-	static int pc;
-	static int reg[] = new int[4];
-	public static int compareUnsigned(long x, long y) {
-		 return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE);
-	}
-    static 	ComputerCount PC = new ComputerCount();
-    
-	// Here the first program hard coded as an array
-	static int progr[] = {
-			// As minimal RISC-V assembler example
-			0x00200093, // addi x1 x0 2
-			0x00300113, // addi x2 x0 3
-			0x002081b3, // add x3 x1 x2
-	};
 
-	public static void main(String[] args) {
-		
-		boolean jump = false;
+	static int pc;
+	static int reg[] = new int[32];
+    public static int compareUnsigned(long x, long y) {
+        return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE);
+    }
+
+    static 	ComputerCount PC = new ComputerCount();
+
+    static int progr[];
+	public static void main(String[] args) throws IOException {
+		Path path = Paths.get("./src/InstructionTests/test_add.bin");
+		byte[] data = Files.readAllBytes(path);
 		System.out.println("Hello RISC-V World!");
 
 		pc = 0;
+		Translator translator = new Translator(data);
+		progr = translator.getFinalInstructions();
 
 		for (;;) {
 			// instructions is 32bits totally 
@@ -119,7 +123,7 @@ public class IsaSim {
 				//			reg[rd] = (0xFFFFF000 + imm110 )|(0x7FFFFFE0 + reg[rs1]);
 				//		}else {
 				//			reg[rd] = (0xFFFFF000 + imm110 )|(reg[rs1]);
-				//		}	
+				//		}
 				//	}
 				case 0x07:
 					if((imm110 >> 11 )==1){
@@ -133,7 +137,7 @@ public class IsaSim {
 				//			reg[rd] = (0xFFFFF000 + imm110 )&(0x7FFFFFE0 + reg[rs1]);
 				//		}else {
 				//			reg[rd] = (0xFFFFF000 + imm110 )&(reg[rs1]);
-				//		}	
+				//		}
 				//	}
 					break;
 				// SLLI
@@ -166,7 +170,7 @@ public class IsaSim {
 								reg[rd]=reg[rs1]-reg[rs2];
 								break;
 						}
-					case 0x01://SLL 
+					case 0x01://SLL
 						reg[rd]=reg[rs1] << (reg[rs2] & 0x1F);
 						break;
 					case 0x05://SRL and SRA
@@ -201,10 +205,10 @@ public class IsaSim {
 					case 0x07:
 						reg[rd]=reg[rs1]&reg[rs2];
 						break;
-	
+
 				}
 				break;
-			case 0x73: // ECALL https://github.com/kvakil/venus/wiki/Environmental-Calls 
+			case 0x73: // ECALL https://github.com/kvakil/venus/wiki/Environmental-Calls
 				if(reg[0x1010]==1) {
 					System.out.println(reg[0x1011]);
 				}else if(reg[0x1010] == 4){
@@ -229,10 +233,10 @@ public class IsaSim {
 				jump=true;
 				break;
 			case 0x67:
-				
-				
-				
-				
+
+
+
+
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
