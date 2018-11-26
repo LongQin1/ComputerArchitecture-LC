@@ -28,7 +28,7 @@ public class IsaSim {
 
     static int progr[];
 	public static void main(String[] args) throws IOException {
-		Path path = Paths.get("./src/InstructionTests/test_add.bin");
+		Path path = Paths.get("./src/cn/t3.bin");
 		byte[] data = Files.readAllBytes(path);
 		System.out.println("Hello RISC-V World!");
 
@@ -42,17 +42,71 @@ public class IsaSim {
 			int opcode = instr & 0x7f;
 			int rd = (instr >> 7) & 0x01f;
 			int rs1 = (instr >> 15) & 0x01f;
-			int imm110 = (instr >> 20);
-			int imm1210 = (instr>> 25 );
-			int imm115 = (instr>> 25 );
+			int imm110 = (instr >> 20) & 0xFFF;
+			int imm1210 = (instr>> 25 & 0x7f);
+			int imm115 = (instr>> 25 ) & 0x7f;
 			int imm40 = (instr>>7)& 0x01f;
 			int imm41 = (instr>>7) &0x01f;
 			int rs2 = (instr>> 20) &  0x01f;
-			int funct3=(instr>> 12) & 0x06f;
+			int funct3=(instr>> 12) & 7;
 			int imm3112 = (instr>>12);
 			int imm2010 = (instr>>12);
-
 			switch (opcode) {
+                case 0x33:
+                    switch(funct3){
+                        case 0x00:
+                            switch(imm115){
+
+                                // add
+                                case 0x0:
+
+                                    reg[rd]=reg[rs1]+reg[rs2];
+                                    break;
+                                //sub
+                                case 0x20:
+                                    reg[rd]=reg[rs1]-reg[rs2];
+                                    break;
+                            }
+                            break;
+                        case 0x01://SLL
+                            reg[rd]=reg[rs1] << (reg[rs2] & 0x1F);
+                            break;
+                        case 0x05://SRL and SRA
+                            switch(imm115) {
+                                case 0x0:
+                                    reg[rd]= reg[rs1] >>(reg[rs2] & 0x1F);
+                                    break;
+                                case 0x20://SRA
+                                    reg[rd]=reg[rs1]>>(reg[rs2]& 0x1F);
+                                    break;
+                            }break;
+                        case 0x02://SLT
+                            if(reg[rs1]<reg[rs2]) {
+                                reg[rd]=1;
+                            }else {
+                                reg[rd]=0;
+                            }
+                            break;
+                        case 0x03://SLTU
+                            if(compareUnsigned(reg[rs1],reg[rs2])<0) {
+                                reg[rd]=1;
+                            }else {
+                                reg[rd]=0;
+                            }
+                            break;
+                        case 0x04://XOR case
+                            reg[rd]=reg[rs1]^reg[rs2];
+                            break;
+                        case 0x06://or case
+                            reg[rd]=reg[rs1]|reg[rs2];
+                            break;
+                        case 0x07:
+                            reg[rd]=reg[rs1]&reg[rs2];
+                            break;
+
+                    }
+                    break;
+
 			//U-type
 			//LUI
 			case 0x37:
@@ -67,8 +121,13 @@ public class IsaSim {
 			//ANDI
 			case 0x13:
 				switch(funct3){
-				case 0x0:	
-					reg[rd] = reg[rs1] + imm110;
+				case 0x0:	// ADDI
+                    if ((imm110 >> 11) == 1) {
+                        reg[rd] =(0xFFFFF000 + imm110) + (reg[rs1]);
+                    }
+                    else {
+                        reg[rd] = (imm110) + (reg[rs1]);
+                    }
 					break;
 				case 0x2:
 					if(reg[rs1] <imm110) {
@@ -94,6 +153,7 @@ public class IsaSim {
 							}
 					}
 					break;
+
 				//XORI
 				case 0x4:
 					if((imm110 >> 11) ==1){
@@ -156,70 +216,20 @@ public class IsaSim {
 					 
 				}
 				break;
-				
-			case 0x33:
-				switch(funct3){
-					case 0x00:
-						switch(imm115){
-							// add
-							case 0x0:
-								reg[rd]=reg[rs1]+reg[rs2];
-								break;
-						//sub
-							case 0x20:
-								reg[rd]=reg[rs1]-reg[rs2];
-								break;
-						}
-					case 0x01://SLL
-						reg[rd]=reg[rs1] << (reg[rs2] & 0x1F);
-						break;
-					case 0x05://SRL and SRA
-						switch(imm115) {
-						case 0x0:
-							reg[rd]= reg[rs1] >>(reg[rs2] & 0x1F);
-							break;
-						case 0x20://SRA
-							reg[rd]=reg[rs1]>>(reg[rs2]& 0x1F);
-							break;
-						}break;
-					case 0x02://SLT
-						if(reg[rs1]<reg[rs2]) {
-							reg[rd]=1;
-						}else {
-							reg[rd]=0;
-						}
-						break;
-					case 0x03://SLTU
-						if(compareUnsigned(reg[rs1],reg[rs2])<0) {
-							reg[rd]=1;
-						}else {
-							reg[rd]=0;
-						}
-						break;
-					case 0x04://XOR case
-						reg[rd]=reg[rs1]^reg[rs2];
-						break;
-					case 0x06://or case
-						reg[rd]=reg[rs1]|reg[rs2];
-						break;
-					case 0x07:
-						reg[rd]=reg[rs1]&reg[rs2];
-						break;
 
-				}
-				break;
+
 			case 0x73: // ECALL https://github.com/kvakil/venus/wiki/Environmental-Calls
-				if(reg[0x1010]==1) {
+				if(reg[10]==1) {
 					System.out.println(reg[0x1011]);
-				}else if(reg[0x1010] == 4){
+				}else if(reg[10] == 4){
 					System.out.println(reg[0x1011]);
-				}else if (reg[0x1010] == 9){ // using pointer couldn't do it rightn ow
+				}else if (reg[10] == 9){ // using pointer couldn't do it rightn ow
 					
-				}else if( reg[0x1010] == 10) { //ends the program
+				}else if( reg[10] == 10) { //ends the program
 					System.exit(1);
-				}else if(reg[0x1010] == 11) {//prints ASCII character in a1
+				}else if(reg[10] == 11) {//prints ASCII character in a1
 					System.out.println(reg[0x1011]);
-				}else if(reg[0x1010] == 17){ // we don't this end the program with return code ,try it after running program
+				}else if(reg[10] == 17){ // we don't this end the program with return code ,try it after running program
 					System.exit(reg[0x1011]);
 				}else {
 					System.out.println("please enter the right a0");
@@ -230,7 +240,7 @@ public class IsaSim {
 			case 0x6F:
 				reg[rd]=ComputerCount.PC + 4;
 				PC.jal(imm1210);
-				jump=true;
+				// jump=true;
 				break;
 			case 0x67:
 
@@ -247,7 +257,7 @@ public class IsaSim {
 				break;
 			}
 			for (int i = 0; i < reg.length; ++i) {
-				System.out.print(reg[i] + " ");
+				System.out.print(Integer.toHexString(reg[i])+ "  ");
 			}
 			System.out.println();	
 		}
