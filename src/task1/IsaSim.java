@@ -17,7 +17,7 @@ import java.nio.file.Paths;
  *
  */
 public class IsaSim {
-
+	static byte [] memory = new byte [4000000];
 	static int pc;
 	static int reg[] = new int[32];
     public static int compareUnsigned(long x, long y) {
@@ -30,6 +30,7 @@ public class IsaSim {
 	public static void main(String[] args) throws IOException {
 		Path path = Paths.get("./src/cn/t3.bin");
 		byte[] data = Files.readAllBytes(path);
+		boolean jump = false;
 		System.out.println("Hello RISC-V World!");
 
 		pc = 0;
@@ -37,13 +38,14 @@ public class IsaSim {
 		progr = translator.getFinalInstructions();
 
 		for (;;) {
+			jump = false;
 			// instructions is 32bits totally 
 			int instr = progr[pc];
 			int opcode = instr & 0x7f;
 			int rd = (instr >> 7) & 0x01f;
 			int rs1 = (instr >> 15) & 0x01f;
 			int imm110 = (instr >> 20) & 0xFFF;
-			int imm1210 = (instr>> 25 & 0x7f);
+			int imm1210 = (instr>> 25) & 0x7f;
 			int imm115 = (instr>> 25 ) & 0x7f;
 			int imm40 = (instr>>7)& 0x01f;
 			int imm41 = (instr>>7) &0x01f;
@@ -51,6 +53,15 @@ public class IsaSim {
 			int funct3=(instr>> 12) & 7;
 			int imm3112 = (instr>>12);
 			int imm2010 = (instr>>12);
+			int imm7 = (instr>> 25 & 0x7f);// imm1210
+			int imm5 = (instr>>7) &0x01f; //imm41
+			int imm11 = (instr>>7) &0x01;
+			int imm4 = (instr>> 8) & 0x0F;
+			int imm105 =(instr >> 25)& 0x3f;
+			int imm12 = (instr >> 31) & 0x01;
+			int imm13 = ( ((imm12<< 11) & 0x800) + ((imm11<<10) & 0x400) + ((imm105<<4) & 0x3F0) +(imm4 & 0xF))<<1;
+			
+			
 			switch (opcode) {
                 case 0x33:
                     switch(funct3){
@@ -226,11 +237,12 @@ public class IsaSim {
 				}else if (reg[10] == 9){ // using pointer couldn't do it rightn ow
 					
 				}else if( reg[10] == 10) { //ends the program
-					System.exit(1);
+					ComputerCount.PC = progr.length*5;
 				}else if(reg[10] == 11) {//prints ASCII character in a1
-					System.out.println(reg[0x1011]);
+					System.out.println(Character.toString((char) reg[0x1011]));
 				}else if(reg[10] == 17){ // we don't this end the program with return code ,try it after running program
-					System.exit(reg[0x1011]);
+					System.out.println(reg[0x1011]);
+					ComputerCount.PC = progr.length*5;
 				}else {
 					System.out.println("please enter the right a0");
 				}
@@ -243,10 +255,133 @@ public class IsaSim {
 				// jump=true;
 				break;
 			case 0x67:
+				reg[rd]=ComputerCount.PC + 4;
+				if (imm1210>>11==1){
+					ComputerCount.PC=(reg[rs1]+(0xFFFFF000+imm1210)&0x7FFFFFFF);
+				}else {
+					ComputerCount.PC=(reg[rs1]+imm1210)&0x7FFFFFFF;
+				}
+				jump=true;
+				break;
 
+			case 0x63:
+				switch (funct3){
+					//BEQ Branch Equal
+					case 0x00:
+					if (reg[rs1] == reg[rs2]){
+						if (imm12==1){
+							ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+						}else {
+							ComputerCount.PC=ComputerCount.PC+imm13;
+						}
+						jump=true;
+					}
+					break;
+					//BNE Branch if not Equal
+					case 0x01:
+					if (reg[rs1] != reg[rs2]){
+						if (imm12==1){
+							ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+						}else {
+							ComputerCount.PC=ComputerCount.PC+imm13;
+						}
+						jump=true;
+					}
+					break;
+					
+					//BLT
+					case 0x04:
+						if (reg[rs1] < reg[rs2]){
+							if (imm12==1){
+								ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+							}else {
+								ComputerCount.PC=ComputerCount.PC+imm13;
+							}
+							jump=true;
+						}
+						break;
+						
+					// BGE
+					case 0x05:
+						if (reg[rs1] >= reg[rs2]){
+							if (imm12==1){
+								ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+							}else {
+								ComputerCount.PC=ComputerCount.PC+imm13;
+							}
+							jump=true;
+						}
+						break;
+					
+					//BLTU
+					case 0x06:
+					if (compareUnsigned(reg[rs1],reg[rs2])<0){
+						if (imm12==1){
+							ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+						}else {
+							ComputerCount.PC=ComputerCount.PC+imm13;
+						}
+						jump=true;
+					}
+					break;
+					
+					// BEGU
+					case 0x07:
+						if (compareUnsigned(reg[rs1],reg[rs2])>=0){
+							if (imm12==1){
+								ComputerCount.PC=ComputerCount.PC+(0xFFFFE000+imm13);
+							}else {
+								ComputerCount.PC=ComputerCount.PC+imm13;
+							}
+							jump=true;
+						}
+						break;
+						
+				}
+				break;
+				
+				// load instructions
+				case 0x3: 
+					switch(funct3) {
+					case 0x0: //LB
+						if(imm110<0) { //negative offset
+							imm110=(imm110 + 0xFFFFF000);
+							if(memory[reg[rs1]+imm110] < 0) { //negative value in memory
+								reg[rd] = (memory[reg[rs1]+imm110]&0xFF) + 0xFFFFFF00;
+							}else {
+								reg[rd] = (memory[reg[rs1]+imm110]&0xFF);
+							}
+						}else {// positive offset
+							if(memory[reg[rs1]+imm110] < 0) {
+								reg[rd] = ((memory[reg[rs1]+imm110])&0xFF)+0xFFFFFF00;
+							}else {
+								reg[rd] = (memory[reg[rs1]+imm110]&0xFF);
 
-
-
+							}
+							
+						}
+						break;
+					case 0x4: //LBU
+						if(imm110<0) {
+							imm110=(imm110 +0xFFFFF000);
+						}
+						reg[rd] = (((int)memory[reg[rs1]+imm110])& 0xFF);
+					
+					break;
+					case 0x1: //LH - load hexa
+						
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					}
+					break;
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
@@ -255,6 +390,9 @@ public class IsaSim {
 			++pc; // We count in 4 byte words
 			if (pc >= progr.length) {
 				break;
+			}
+			if(!jump) {
+				PC.nextInstruction();
 			}
 			for (int i = 0; i < reg.length; ++i) {
 				System.out.print(Integer.toHexString(reg[i])+ "  ");
