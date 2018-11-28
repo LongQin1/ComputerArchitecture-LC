@@ -362,26 +362,64 @@ public class IsaSim {
 						}
 						break;
 					case 0x4: //LBU
-						if(imm110<0) {
+						if(imm110>>>11==1) {
 							imm110=(imm110 +0xFFFFF000);
 						}
 						reg[rd] = (((int)memory[reg[rs1]+imm110])& 0xFF);
 					
 					break;
 					case 0x1: //LH - load hexa
+						if(imm110 >>>11 ==1) {
+							imm110=(imm110 +0xFFFFFF00 );
+							}
+								reg[rd]=((int)memory[reg[rs1]+imm110+1]<<8) + ((int)memory[reg[rs1]+imm110]&0xFF);
+						break;		
 						
 					
-					
-					
-					
-					
-					
-					
-					
-					
-					
+					case 0x2:  // LW
+						if(imm110 >>>11 ==1) {
+							imm110=(imm110 +0xFFFFFF00 );
+							}
+								reg[rd]=((int)memory[reg[rs1]+imm110+3]<<24) + (((int)memory[reg[rs1]+imm110]<<16)& 0xFFFFFF)
+										+ (((int)memory[reg[rs1]+imm110]<<8)& 0xFFFF) + ((int)memory[reg[rs1]+imm110]&0xFF);	
+						break;
+					case 0x5://LHU
+						if(imm110>>>11==1) {
+							imm110=(imm110 +0xFFFFF000);
+						}
+						reg[rd]=(((int)memory[reg[rs1]+imm110]<<8)& 0xFFFF) + (((int)memory[reg[rs1]+imm110])&0xFF);
+					break;
 					}
 					break;
+			case  0x23:
+				switch(funct3) {
+				case 0x0: // SB- save byte
+					imm110 = (imm115<<7)+imm40;
+					if(imm110 >>>11 ==1) {
+						imm110=(imm110 +0xFFFFFF00 );
+						}
+					memory[reg[rs1]+imm110] = (byte)(reg[rs2] & 0xFF);			
+				break;
+				case 0x1:// SH - save hax
+					imm110 = (imm115<<7)+imm40;
+					if(imm110 >>>11 ==1) {
+						imm110=(imm110 +0xFFFFFF00 );
+						}
+					memory[reg[rs1]+imm110] =  (byte)(reg[rs2] & 0xFF);		
+					memory[reg[rs1]+imm110+1]=(byte)((reg[rs2] >> 8 )& 0xFF);
+				break;
+				
+				case 0x2:// SW -save word  
+					imm110 = (imm115<<7)+imm40;
+					if(imm110 >>>11 ==1) {
+						imm110=(imm110 +0xFFFFFF00 );
+						}
+					memory[reg[rs1]+imm110] =  (byte)(reg[rs2] & 0xFF);	
+					memory[reg[rs1]+imm110+1] = (byte)((reg[rs2] >> 8)&0xFF);	
+					memory[reg[rs1]+imm110+2] = (byte)((reg[rs2] >> 16)&0xFF);	
+				break;
+				}
+				break;
 			default:
 				System.out.println("Opcode " + opcode + " not yet implemented");
 				break;
