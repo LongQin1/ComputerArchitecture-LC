@@ -28,19 +28,17 @@ public class IsaSim {
 
     static int progr[];
 	public static void main(String[] args) throws IOException {
-		Path path = Paths.get("./src/cn/t3.bin");
-		byte[] data = Files.readAllBytes(path);
-		boolean jump = false;
-		System.out.println("Hello RISC-V World!");
+		// Path path = Paths.get("");
+		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\test3\\loop.bin");
+		boolean jump;
 
-		pc = 0;
-		Translator translator = new Translator(data);
-		progr = translator.getFinalInstructions();
 
+		progr = fileReader.getIntergers();
+		PC.setPC(0);
 		for (;;) {
 			jump = false;
 			// instructions is 32bits totally 
-			int instr = progr[pc];
+			int instr = progr[ComputerCount.PC/4];
 			int opcode = instr & 0x7f;
 			int rd = (instr >> 7) & 0x01f;
 			int rs1 = (instr >> 15) & 0x01f;
@@ -426,7 +424,9 @@ public class IsaSim {
 			}
 
 			++pc; // We count in 4 byte words
-			if (pc >= progr.length) {
+
+
+			if (ComputerCount.PC/4 >= progr.length) {
 				break;
 			}
 			if(!jump) {
