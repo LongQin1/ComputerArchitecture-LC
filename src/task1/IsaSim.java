@@ -33,7 +33,7 @@ public class IsaSim {
     static int progr[];
 	public static void main(String[] args) throws IOException {
 		// Path path = Paths.get("");
-		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\InstructionTests\\test_lb.bin");
+		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\test3\\loop.bin");
 		boolean jump;
 
 
@@ -390,20 +390,22 @@ public class IsaSim {
 							break;
 						case 0x1: //LH - load hexa
 							if (imm110 >>> 11 == 1) {
-								imm110 = (imm110 + 0xFFFFFF00);
+								imm110 = (imm110 + 0xFFFFF000);
 							}
+							System.out.println(reg[rs1] + imm110);
 							reg[rd] = ((int) memory[reg[rs1] + imm110 + 1] << 8) + ((int) memory[reg[rs1] + imm110] & 0xFF);
 							break;
 
 
 						case 0x2:  // LW
-							if (imm110 >>> 11 == 1) {
+							if (imm12 == 1) {
 								imm110 = (imm110 + 0xFFFFF000);
 							}
-							reg[rd] = ((int) memory[reg[rs1] + imm110 + 3] << 24) +
-									(((int) memory[reg[rs1] + imm110 + 2] << 16) & 0xFFFFFF)
-									+ (((int) memory[reg[rs1] + imm110 + 1] << 8) & 0xFFFF) +
-									((int) memory[reg[rs1] + imm110] & 0xFF);
+							reg[rd] = (((int) memory[reg[rs1] + imm110 + 3] << 24)) +
+									(((int) memory[reg[rs1] + imm110 + 2] << 16) & 0xFFFFFF)+
+									(((int) memory[reg[rs1] + imm110 + 1] << 8) & 0xFFFF) +
+									(((int) memory[reg[rs1] + imm110]) & 0xFF);
+
 							break;
 						case 0x5://LHU
 							if (imm110 >>> 11 == 1) {
@@ -418,16 +420,16 @@ public class IsaSim {
 						case 0x0: // SB- save byte
 							imm110 = (imm115 << 5) + imm40;
 							if (imm110 >>> 11 == 1) {
-								imm110 = (imm110 + 0xFFFFFF00);
+								imm110 = (imm110 + 0xFFFFF000);
 							}
 							memory[reg[rs1] + imm110] = (byte) (reg[rs2] & 0xFF);
-							System.out.println(rs1 + imm110);
 							break;
 						case 0x1:// SH - save hax
-							imm110 = (imm115 << 7) + imm40;
+							imm110 = (imm115 << 5) + imm40;
 							if (imm110 >>> 11 == 1) {
-								imm110 = (imm110 + 0xFFFFFF00);
+								imm110 = (imm110 + 0xFFFFF000);
 							}
+							System.out.println(reg[rs1] + imm110);
 							memory[reg[rs1] + imm110] = (byte) (reg[rs2] & 0xFF);
 							memory[reg[rs1] + imm110 + 1] = (byte) ((reg[rs2] >> 8) & 0xFF);
 							break;
@@ -460,10 +462,7 @@ public class IsaSim {
 
 
 			}
-			for (int i = 0; i < reg.length; ++i) {
-				System.out.print(Integer.toHexString(reg[i]) + "  ");
-			}
-			System.out.println();
+
 		}
 		for (int i = 0; i < reg.length; ++i) {
 			System.out.print(Integer.toHexString(reg[i])+ "  ");
