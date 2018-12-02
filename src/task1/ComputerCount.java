@@ -16,7 +16,7 @@ public class ComputerCount {
 	
 	public void jal(int i) {
 	    if(i>>11==1) {
-			PC=(0xFFFFF000 +i)+PC;
+			PC=(0xFFE00000  +i)+PC;
 		}else{
 			PC=(i)+PC;
 		}

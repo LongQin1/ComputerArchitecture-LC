@@ -33,7 +33,7 @@ public class IsaSim {
     static int progr[];
 	public static void main(String[] args) throws IOException {
 		// Path path = Paths.get("");
-		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\InstructionTests\\test_jalr.bin");
+		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\test2\\branchmany.bin");
 		boolean jump;
 
 
@@ -258,10 +258,13 @@ public class IsaSim {
 				int im_11 = (instr>>20) & 0x1;
 				int im1_10 = (instr>>21) & 0x3FF;
 				int imjal= (((im20<<19)+(im19_12<<11))+(im_11<<10)+im1_10)<<1;
-				reg[rd]=ComputerCount.PC + 4;
+				if(rd!=0) {
+					reg[rd] = ComputerCount.PC + 4;
+				}
 				PC.jal(imjal);
 				jump=true;
 				break;
+
 			case 0x67: //JALR
 				if(rd!=0) {
 					reg[rd] = ComputerCount.PC + 4;
