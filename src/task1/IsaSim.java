@@ -1,6 +1,8 @@
 package task1;
 
 
+import com.sun.org.apache.bcel.internal.generic.MethodObserver;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +22,8 @@ public class IsaSim {
 	static byte [] memory = new byte [4000000];
 	static int pc;
 	static int reg[] = new int[32];
+	static MemoryPrinter memPrinter = new MemoryPrinter();
+	static String binDump = "";
     public static int compareUnsigned(long x, long y) {
         return Long.compare(x + Long.MIN_VALUE, y + Long.MIN_VALUE);
     }
@@ -29,7 +33,7 @@ public class IsaSim {
     static int progr[];
 	public static void main(String[] args) throws IOException {
 		// Path path = Paths.get("");
-		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\test3\\loop.bin");
+		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\InstructionTests\\test_jalr.bin");
 		boolean jump;
 
 
@@ -217,10 +221,11 @@ public class IsaSim {
 				case 0x05:
 					switch(imm115){
 					case 0x00:
-						reg[rd]= reg[rs1] >>> rs2;
-					case 0x20:
-						reg[rd]= reg[rs1] >> rs2;
-					}
+						reg[rd]= reg[rs1] >>> (rs2 & 0x1F);
+						break;
+				}
+				case 0x20:
+					reg[rd]= reg[rs1] >> rs2;
 					break;
 					 
 				}
@@ -248,16 +253,23 @@ public class IsaSim {
 			// start doing jump instructions
 			// the first instruction will be JAL
 			case 0x6F:
+				int im20 = (instr>>31) & 0x1;
+				int im19_12 = (instr>>12) & 0xFF;
+				int im_11 = (instr>>20) & 0x1;
+				int im1_10 = (instr>>21) & 0x3FF;
+				int imjal= (((im20<<19)+(im19_12<<11))+(im_11<<10)+im1_10)<<1;
 				reg[rd]=ComputerCount.PC + 4;
-				PC.jal(imm1210);
-				// jump=true;
+				PC.jal(imjal);
+				jump=true;
 				break;
-			case 0x67:
-				reg[rd]=ComputerCount.PC + 4;
+			case 0x67: //JALR
+				if(rd!=0) {
+					reg[rd] = ComputerCount.PC + 4;
+				}
 				if (imm1210>>11==1){
-					ComputerCount.PC=(reg[rs1]+(0xFFFFF000+imm1210)&0x7FFFFFFF);
+					ComputerCount.PC=(reg[rs1]+(0xFFFFF000+imm110)) & 0xFFFFFFFE;
 				}else {
-					ComputerCount.PC=(reg[rs1]+imm1210)&0x7FFFFFFF;
+					ComputerCount.PC=(reg[rs1]+imm110)&0xFFFFFFFE;
 				}
 				jump=true;
 				break;
@@ -376,10 +388,12 @@ public class IsaSim {
 					
 					case 0x2:  // LW
 						if(imm110 >>>11 ==1) {
-							imm110=(imm110 +0xFFFFFF00 );
-							}
-								reg[rd]=((int)memory[reg[rs1]+imm110+3]<<24) + (((int)memory[reg[rs1]+imm110]<<16)& 0xFFFFFF)
-										+ (((int)memory[reg[rs1]+imm110]<<8)& 0xFFFF) + ((int)memory[reg[rs1]+imm110]&0xFF);	
+							imm110=(imm110 +0xFFFFF000 );
+						}
+						reg[rd]=((int)memory[reg[rs1]+imm110+3]<<24) +
+								(((int)memory[reg[rs1]+imm110+2]<<16)& 0xFFFFFF)
+									+ (((int)memory[reg[rs1]+imm110+1]<<8)& 0xFFFF) +
+								((int)memory[reg[rs1]+imm110]&0xFF);
 						break;
 					case 0x5://LHU
 						if(imm110>>>11==1) {
@@ -408,14 +422,15 @@ public class IsaSim {
 				break;
 				
 				case 0x2:// SW -save word  
-					imm110 = (imm115<<7)+imm40;
+					imm110 = (imm115<<5)+imm40;
 					if(imm110 >>>11 ==1) {
-						imm110=(imm110 +0xFFFFFF00 );
+						imm110=(imm110 +0xFFFFF000 );
 						}
-					memory[reg[rs1]+imm110] =  (byte)(reg[rs2] & 0xFF);	
+					memory[reg[rs1]+imm110] =  (byte)(reg[rs2] & 0xFF);
 					memory[reg[rs1]+imm110+1] = (byte)((reg[rs2] >> 8)&0xFF);	
-					memory[reg[rs1]+imm110+2] = (byte)((reg[rs2] >> 16)&0xFF);	
-				break;
+					memory[reg[rs1]+imm110+2] = (byte)((reg[rs2] >> 16)&0xFF);
+					memory[reg[rs1]+imm110+3] = (byte)((reg[rs2] >> 24) & 0xFF);
+					break;
 				}
 				break;
 			default:
@@ -431,14 +446,18 @@ public class IsaSim {
 			}
 			if(!jump) {
 				PC.nextInstruction();
+
+
 			}
 			for (int i = 0; i < reg.length; ++i) {
 				System.out.print(Integer.toHexString(reg[i])+ "  ");
+				binDump = binDump + (Long.toBinaryString( Integer.toUnsignedLong(reg[i]) | 0x100000000L ).substring(1) + System.lineSeparator());
 			}
 			System.out.println();	
 		}
 
 		System.out.println("Program exit");
+		memPrinter.CreateFile(binDump);
 
 	}
 
