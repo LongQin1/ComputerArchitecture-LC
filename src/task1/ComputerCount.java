@@ -14,9 +14,11 @@ public class ComputerCount {
 	}
 	
 	
-	public void jal(int i) {
-	    if(i>>11==1) {
+	public void jal(int i,int o) {
+        System.out.println("i: "+i);
+        if(o==1) {
 			PC=(0xFFE00000  +i)+PC;
+            System.out.println("pc:" +PC);
 		}else{
 			PC=(i)+PC;
 		}

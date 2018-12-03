@@ -32,7 +32,9 @@ public class IsaSim {
 
     static int progr[];
 	public static void main(String[] args) throws IOException {
-		// Path path = Paths.get("");
+        int immm13;
+
+        // Path path = Paths.get("");
 		FileReader fileReader = new FileReader("C:\\Users\\Christian\\Desktop\\climify2\\ComputerArchitecture-LC\\src\\test3\\loop.bin");
 		boolean jump;
 
@@ -62,7 +64,6 @@ public class IsaSim {
 			int imm105 = (instr >> 25) & 0x3f;
 			int imm12 = (instr >> 31) & 0x01;
 			int imm13 = (((imm12 << 11) & 0x800) + ((imm11 << 10) & 0x400) + ((imm105 << 4) & 0x3F0) + (imm4 & 0xF)) << 1;
-
 
 			switch (opcode) {
 				case 0x33:
@@ -128,6 +129,7 @@ public class IsaSim {
 					break;
 				// AUIPC
 				case 0x17:
+                    System.out.println("?");
 					reg[rd] = (imm3112 << 12) + pc;
 					break;
 				//J-type JAL in our case (jump and link)
@@ -264,7 +266,7 @@ public class IsaSim {
 					if (rd != 0) {
 						reg[rd] = ComputerCount.PC + 4;
 					}
-					PC.jal(imjal);
+					PC.jal(imjal,imm12);
 					jump = true;
 					break;
 
@@ -281,14 +283,23 @@ public class IsaSim {
 					break;
 
 				case 0x63:
-					switch (funct3) {
+                    int im11 = (instr>>7) & 0x1;
+                    int im4 = (instr>>8) & 0xF;
+                    int im6 = (instr>>25) & 0x3F;
+                    int im1 = (instr>>31) & 0x1;
+                    immm13= (((im1<<11)+(im11<<10))+(im6<<4)+im4)<<1;
+
+                    switch (funct3) {
 						//BEQ Branch Equal
 						case 0x00:
-							if (reg[rs1] == reg[rs2]) {
-								if (imm12 == 1) {
-									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + imm13);
+
+
+                            if (reg[rs1] == reg[rs2]) {
+
+                                if (imm12 == 1) {
+									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + immm13);
 								} else {
-									ComputerCount.PC = ComputerCount.PC + imm13;
+									ComputerCount.PC = ComputerCount.PC + immm13;
 								}
 								jump = true;
 							}
@@ -297,9 +308,9 @@ public class IsaSim {
 						case 0x01:
 							if (reg[rs1] != reg[rs2]) {
 								if (imm12 == 1) {
-									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + imm13);
+									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + immm13);
 								} else {
-									ComputerCount.PC = ComputerCount.PC + imm13;
+									ComputerCount.PC = ComputerCount.PC + immm13;
 								}
 								jump = true;
 							}
@@ -308,10 +319,11 @@ public class IsaSim {
 						//BLT
 						case 0x04:
 							if (reg[rs1] < reg[rs2]) {
-								if (imm12 == 1) {
-									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + imm13);
+                                immm13= ((((im1<<11) & 0x800)+((im11<<10) & 0x400))+((im6<<4) & 0x3F0) + (im4 & 0xF))<<1;
+                                if (imm12 == 1) {
+									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + immm13);
 								} else {
-									ComputerCount.PC = ComputerCount.PC + imm13;
+									ComputerCount.PC = ComputerCount.PC + immm13;
 								}
 								jump = true;
 							}
@@ -333,9 +345,9 @@ public class IsaSim {
 						case 0x06:
 							if (compareUnsigned(reg[rs1], reg[rs2]) < 0) {
 								if (imm12 == 1) {
-									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + imm13);
+									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + immm13);
 								} else {
-									ComputerCount.PC = ComputerCount.PC + imm13;
+									ComputerCount.PC = ComputerCount.PC + immm13;
 								}
 								jump = true;
 							}
@@ -345,9 +357,9 @@ public class IsaSim {
 						case 0x07:
 							if (compareUnsigned(reg[rs1], reg[rs2]) >= 0) {
 								if (imm12 == 1) {
-									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + imm13);
+									ComputerCount.PC = ComputerCount.PC + (0xFFFFE000 + immm13);
 								} else {
-									ComputerCount.PC = ComputerCount.PC + imm13;
+									ComputerCount.PC = ComputerCount.PC + immm13;
 								}
 								jump = true;
 							}
@@ -436,21 +448,20 @@ public class IsaSim {
 
 						case 0x2:// SW -save word
 							imm110 = (imm115 << 5) + imm40;
-							if (imm110 >>> 11 == 1) {
+							if (imm12 == 1) {
 								imm110 = (imm110 + 0xFFFFF000);
 							}
 							memory[reg[rs1] + imm110] = (byte) (reg[rs2] & 0xFF);
 							memory[reg[rs1] + imm110 + 1] = (byte) ((reg[rs2] >> 8) & 0xFF);
 							memory[reg[rs1] + imm110 + 2] = (byte) ((reg[rs2] >> 16) & 0xFF);
 							memory[reg[rs1] + imm110 + 3] = (byte) ((reg[rs2] >> 24) & 0xFF);
-							break;
+                            break;
 					}
 					break;
 				default:
 					System.out.println("Opcode " + opcode + " not yet implemented");
 					break;
 			}
-
 			++pc; // We count in 4 byte words
 
 
@@ -459,8 +470,6 @@ public class IsaSim {
 			}
 			if (!jump) {
 				PC.nextInstruction();
-
-
 			}
 
 		}
